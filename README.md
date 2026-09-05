@@ -1,4 +1,4 @@
-# restaurante_app - Semana 11
+# restaurante_app - Semana 12
 
 ## Estudiante
 
@@ -6,11 +6,17 @@
 
 ## Descripción
 
-El proyecto `restaurante_app` es una aplicación desarrollada en Python utilizando programación orientada a objetos y una organización modular.
+El proyecto `restaurante_app` corresponde a una aplicación desarrollada en Python utilizando Programación Orientada a Objetos y una arquitectura modular.
 
-En esta Semana 11 se amplió el sistema desarrollado anteriormente para incorporar el manejo de usuarios, productos con stock y ventas. La aplicación permite registrar productos y usuarios, realizar ventas, controlar el stock disponible y consultar las ventas realizadas por un usuario.
+En esta Semana 12 se mantiene la funcionalidad desarrollada en la Semana 11 y se mejora el rendimiento de las búsquedas y consultas mediante el uso adecuado de colecciones.
 
-La información del sistema se conserva mediante archivos JSON, permitiendo recuperar los datos cuando el programa vuelve a ejecutarse.
+El sistema permite registrar productos y usuarios, realizar ventas, controlar el stock disponible, consultar las ventas de un usuario y conservar la información mediante archivos JSON.
+
+## Objetivo de la Semana 12
+
+La mejora principal consiste en evitar recorridos completos e innecesarios de las listas cuando se conoce una clave de búsqueda.
+
+Para ello se mantienen las listas principales y se incorporan diccionarios auxiliares que funcionan como índices en memoria.
 
 ## Estructura del proyecto
 
@@ -33,90 +39,166 @@ restaurante_app/
 └── README.md
 ```
 
-## Responsabilidad de los componentes
+## Colecciones utilizadas
 
-### Producto
+El sistema conserva las listas principales:
 
-La clase `Producto` representa los productos disponibles en el restaurante.
+```python
+self._productos
+self._usuarios
+self._ventas
+```
 
-Contiene los siguientes atributos:
+Estas colecciones continúan siendo utilizadas para almacenar, recorrer, listar y persistir los objetos.
 
-* Código
-* Nombre
-* Categoría
-* Precio
-* Stock
+Además, se incorporaron los siguientes índices auxiliares:
 
-Además, valida que el precio y el stock no sean negativos y permite disminuir el stock mediante el método `vender()`.
+### Índice de productos
 
-### Usuario
+```python
+self._indice_productos: dict[str, Producto]
+```
 
-La clase `Usuario` representa a las personas registradas en el sistema.
+La clave utilizada es el código del producto.
 
-Contiene:
+Permite realizar una búsqueda directamente:
 
-* Identificación
-* Nombre
-* Correo
+```python
+self._indice_productos.get(codigo)
+```
 
-También realiza validaciones básicas de los datos y permite convertir la información a un diccionario para su almacenamiento en JSON.
+De esta manera se evita recorrer toda la lista de productos cada vez que se necesita localizar un producto.
 
-### Venta
+### Índice de usuarios
 
-La clase `Venta` representa la relación entre un usuario y un producto vendido.
+```python
+self._indice_usuarios: dict[str, Usuario]
+```
 
-Contiene:
+La clave utilizada es la identificación del usuario.
 
-* Identificación del usuario
-* Código del producto
-* Cantidad vendida
+La búsqueda se realiza mediante:
 
-La venta únicamente se registra cuando el usuario y el producto existen y existe suficiente stock.
+```python
+self._indice_usuarios.get(identificacion)
+```
 
-### Restaurante
+Esto permite localizar rápidamente un usuario por su identificación.
 
-La clase `Restaurante` contiene la lógica principal del sistema.
+### Índice de ventas por usuario
 
-Administra las colecciones de:
+```python
+self._indice_ventas_usuario: dict[str, list[Venta]]
+```
 
-* Productos
-* Usuarios
-* Ventas
+Este índice agrupa las ventas según la identificación del usuario.
 
-También se encarga de registrar productos y usuarios, buscar información, realizar ventas y consultar las ventas de un usuario.
+Cuando se consulta las ventas de un usuario, se obtiene directamente la lista correspondiente:
 
-### ArchivoServicio
+```python
+self._indice_ventas_usuario.get(
+    identificacion_usuario,
+    []
+)
+```
 
-`ArchivoServicio` se encarga de la persistencia de información mediante archivos JSON.
+Así se evita recorrer toda la colección de ventas para cada consulta.
 
-Administra:
+## Reconstrucción de índices
 
-* `productos.json`
-* `usuarios.json`
-* `ventas.json`
+Al iniciar el programa se cargan los productos, usuarios y ventas desde los archivos JSON.
 
-Utiliza `json.dump()` para guardar información y `json.load()` para recuperarla.
+Después de recuperar los objetos se ejecuta:
 
-### main.py
+```python
+self._reconstruir_indices()
+```
 
-Es el punto de entrada de la aplicación.
+Este método reconstruye los tres índices en memoria a partir de las colecciones principales.
 
-Presenta el menú al usuario, solicita información mediante `input()` y ejecuta las operaciones utilizando los métodos de `Restaurante`.
+De esta forma, los diccionarios auxiliares no necesitan ser almacenados en los archivos JSON y pueden volver a generarse cada vez que se inicia el sistema.
 
-## Funcionamiento del stock
+## Sincronización de los índices
 
-Cada producto posee una cantidad disponible mediante el atributo `stock`.
+Los índices se mantienen sincronizados con las colecciones principales.
 
-Antes de realizar una venta se verifica:
+Cuando se registra un producto:
+
+```python
+self._productos.append(producto)
+self._indice_productos[producto.codigo] = producto
+```
+
+Cuando se registra un usuario:
+
+```python
+self._usuarios.append(usuario)
+self._indice_usuarios[usuario.identificacion] = usuario
+```
+
+Cuando se registra una venta:
+
+```python
+self._ventas.append(venta)
+```
+
+y la venta también se agrega al índice correspondiente:
+
+```python
+self._indice_ventas_usuario[
+    usuario.identificacion
+].append(venta)
+```
+
+De esta manera las listas principales y los índices representan la misma información.
+
+## Uso de las colecciones
+
+Las colecciones tienen responsabilidades diferentes.
+
+### Listas
+
+Las listas se utilizan como colecciones principales para:
+
+* almacenar objetos;
+* recorrer información;
+* listar productos;
+* listar usuarios;
+* mantener todas las ventas;
+* persistir los datos en JSON.
+
+### Diccionarios
+
+Los diccionarios se utilizan como índices auxiliares para:
+
+* búsqueda de productos por código;
+* búsqueda de usuarios por identificación;
+* consulta de ventas por usuario.
+
+No se reemplazaron las listas principales por diccionarios porque ambas estructuras cumplen responsabilidades diferentes.
+
+## Ventas y control de stock
+
+El sistema conserva la relación:
+
+```text
+Usuario
+   ↓
+Venta
+   ↓
+Producto
+```
+
+Antes de registrar una venta se verifica:
 
 1. Que el usuario exista.
 2. Que el producto exista.
 3. Que la cantidad sea mayor que cero.
 4. Que exista stock suficiente.
 
-Cuando la venta es válida, se registra la venta y se descuenta la cantidad correspondiente del stock.
+Cuando la venta es válida, se registra en la colección de ventas y se actualiza el stock del producto.
 
-Por ejemplo:
+Ejemplo:
 
 ```text
 Stock inicial: 10
@@ -124,61 +206,25 @@ Cantidad vendida: 2
 Stock restante: 8
 ```
 
-No se permite que el stock llegue a un valor negativo.
-
-## Relación Usuario - Producto mediante Venta
-
-La operación principal de esta semana relaciona un usuario con un producto mediante una instancia de `Venta`.
-
-El proceso es:
-
-```text
-Usuario
-   ↓
-Producto
-   ↓
-Validación de datos
-   ↓
-Venta
-   ↓
-Registro en colección de ventas
-   ↓
-Disminución del stock
-```
-
-La colección de ventas almacena objetos `Venta`, manteniendo la relación entre los usuarios y los productos vendidos.
+No se permite realizar una venta superior al stock disponible.
 
 ## Persistencia JSON
 
-El sistema utiliza tres archivos JSON:
+La información continúa almacenándose mediante tres archivos:
 
-### productos.json
+```text
+datos/productos.json
+datos/usuarios.json
+datos/ventas.json
+```
 
-Almacena los productos registrados y su stock actualizado.
+Los objetos se convierten a diccionarios antes de ser guardados y posteriormente se reconstruyen como objetos cuando el programa inicia.
 
-### usuarios.json
+Los índices auxiliares no se guardan en JSON porque son estructuras temporales en memoria. Se reconstruyen automáticamente a partir de las listas cargadas.
 
-Almacena los usuarios registrados.
+## Funcionalidades
 
-### ventas.json
-
-Almacena las ventas realizadas, incluyendo la identificación del usuario, el código del producto y la cantidad vendida.
-
-Al iniciar el programa, los archivos JSON son leídos y sus datos son reconstruidos nuevamente como objetos de las clases correspondientes.
-
-## Manejo de excepciones
-
-El sistema controla diferentes situaciones mediante excepciones específicas:
-
-* `FileNotFoundError`: permite iniciar con una colección vacía cuando un archivo todavía no existe.
-* `json.JSONDecodeError`: controla archivos que contienen información JSON inválida.
-* `PermissionError`: controla problemas de permisos de lectura o escritura.
-* `KeyError`: controla registros JSON que no contienen las claves esperadas.
-* `ValueError`: controla errores en las validaciones de productos, usuarios y ventas.
-
-## Operaciones disponibles
-
-El menú principal permite:
+El menú principal mantiene las funcionalidades desarrolladas previamente:
 
 1. Registrar producto.
 2. Listar productos.
@@ -188,42 +234,51 @@ El menú principal permite:
 6. Consultar ventas de un usuario.
 7. Salir.
 
+## Mejoras realizadas
+
+Las principales mejoras implementadas en esta semana son:
+
+* búsqueda de productos mediante un diccionario indexado por código;
+* búsqueda de usuarios mediante un diccionario indexado por identificación;
+* consulta de ventas agrupadas por usuario;
+* reconstrucción automática de índices al iniciar el programa;
+* actualización de los índices al registrar información;
+* conservación de las listas principales;
+* mantenimiento de la persistencia JSON;
+* conservación del control de stock;
+* mantenimiento de la lógica de negocio dentro de `Restaurante`.
+
 ## Pruebas realizadas
 
-Se realizaron pruebas para comprobar el funcionamiento de la aplicación.
+Se realizaron las siguientes comprobaciones:
 
-### Prueba de venta
+### 1. Búsqueda de producto
 
-Se registró un usuario y un producto con stock disponible.
+Se comprobó que un producto pueda ser localizado utilizando su código mediante el índice de productos.
 
-```text
-Producto: Hamburguesa
-Stock inicial: 10
-Cantidad vendida: 2
-Stock restante: 8
-```
+### 2. Búsqueda de usuario
 
-La venta fue registrada correctamente y el stock fue actualizado.
+Se comprobó que un usuario pueda ser localizado utilizando su identificación mediante el índice de usuarios.
 
-### Consulta de ventas
+### 3. Consulta de ventas
 
-Se consultaron las ventas utilizando la identificación del usuario y se obtuvo la venta registrada junto con el producto y la cantidad adquirida.
+Se comprobó que las ventas de un usuario puedan consultarse mediante el índice de ventas agrupadas por identificación.
 
-### Persistencia
+### 4. Registro de venta
 
-Se verificó que los datos sean almacenados en:
+Se comprobó que una venta válida sea registrada correctamente y que el stock sea reducido.
 
-```text
-productos.json
-usuarios.json
-ventas.json
-```
+### 5. Control de stock
 
-Los archivos permiten conservar la información para recuperarla posteriormente al ejecutar nuevamente el programa.
+Se verificó que el sistema no permita vender una cantidad superior al stock disponible.
 
-### Validación de stock
+### 6. Persistencia
 
-También se contempla el rechazo de una venta cuando la cantidad solicitada es mayor que el stock disponible, evitando que el stock quede en valores negativos.
+Se verificó que productos, usuarios y ventas sean almacenados en los archivos JSON.
+
+### 7. Reconstrucción de índices
+
+Se cerró y volvió a ejecutar el programa para comprobar que los datos almacenados en JSON sean recuperados y que los índices auxiliares se reconstruyan correctamente.
 
 ## Ejecución
 
@@ -233,10 +288,16 @@ Para ejecutar el programa se debe ingresar a la carpeta `restaurante_app` y ejec
 python main.py
 ```
 
-También puede utilizarse el intérprete de Python instalado en el equipo.
+En caso de utilizar una instalación específica de Python también puede ejecutarse mediante el intérprete configurado en Visual Studio Code.
 
 ## Conclusión
 
-La Semana 11 permitió ampliar el proyecto `restaurante_app` mediante el uso de colecciones de objetos para representar productos, usuarios y ventas. Se incorporó la relación entre usuarios y productos mediante la clase `Venta`, junto con el control de stock y la persistencia de información mediante archivos JSON.
+La Semana 12 permitió mejorar el rendimiento interno de `restaurante_app` mediante el uso de colecciones auxiliares.
 
-El sistema mantiene una organización modular, separando los modelos, la lógica de negocio, la persistencia y la interacción con el usuario.
+Se conservaron las listas principales para almacenar, recorrer y persistir los objetos, mientras que se incorporaron diccionarios como índices para realizar búsquedas frecuentes por código de producto e identificación de usuario.
+
+También se implementó un índice para agrupar las ventas por usuario, reduciendo recorridos innecesarios al realizar consultas.
+
+Los índices se mantienen sincronizados con las colecciones principales y se reconstruyen automáticamente después de recuperar los datos desde los archivos JSON.
+
+De esta manera, el proyecto conserva las funcionalidades de la Semana 11 y mejora la eficiencia de sus búsquedas y consultas sin modificar innecesariamente la arquitectura del sistema.

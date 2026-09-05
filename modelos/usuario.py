@@ -6,13 +6,19 @@ class Usuario:
         correo: str
     ) -> None:
         if not identificacion:
-            raise ValueError("La identificación es obligatoria.")
+            raise ValueError(
+                "La identificación es obligatoria."
+            )
 
         if not nombre:
-            raise ValueError("El nombre es obligatorio.")
+            raise ValueError(
+                "El nombre es obligatorio."
+            )
 
         if not correo:
-            raise ValueError("El correo es obligatorio.")
+            raise ValueError(
+                "El correo es obligatorio."
+            )
 
         self.identificacion = identificacion
         self.nombre = nombre

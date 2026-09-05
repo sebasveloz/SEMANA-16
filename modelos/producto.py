@@ -27,10 +27,14 @@ class Producto:
 
     def vender(self, cantidad: int) -> None:
         if cantidad <= 0:
-            raise ValueError("La cantidad debe ser mayor que cero.")
+            raise ValueError(
+                "La cantidad debe ser mayor que cero."
+            )
 
         if cantidad > self.stock:
-            raise ValueError("No existe stock suficiente.")
+            raise ValueError(
+                "No existe stock suficiente."
+            )
 
         self.stock -= cantidad
 
