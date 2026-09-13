@@ -3,26 +3,30 @@ class Usuario:
         self,
         identificacion: str,
         nombre: str,
-        correo: str
+        correo: str,
+        usuario: str,
+        contrasena: str
     ) -> None:
         if not identificacion:
-            raise ValueError(
-                "La identificación es obligatoria."
-            )
+            raise ValueError("La identificación es obligatoria.")
 
         if not nombre:
-            raise ValueError(
-                "El nombre es obligatorio."
-            )
+            raise ValueError("El nombre es obligatorio.")
 
         if not correo:
-            raise ValueError(
-                "El correo es obligatorio."
-            )
+            raise ValueError("El correo es obligatorio.")
+
+        if not usuario:
+            raise ValueError("El usuario es obligatorio.")
+
+        if not contrasena:
+            raise ValueError("La contraseña es obligatoria.")
 
         self.identificacion = identificacion
         self.nombre = nombre
         self.correo = correo
+        self.usuario = usuario
+        self.contrasena = contrasena
 
     def __str__(self) -> str:
         return (
@@ -35,5 +39,7 @@ class Usuario:
         return {
             "identificacion": self.identificacion,
             "nombre": self.nombre,
-            "correo": self.correo
+            "correo": self.correo,
+            "usuario": self.usuario,
+            "contrasena": self.contrasena
         }
