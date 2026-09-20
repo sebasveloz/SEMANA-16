@@ -1,23 +1,23 @@
 [
     {
-        "codigo": "P001",
-        "nombre": "Hamburguesa",
-        "categoria": "Comida",
-        "precio": 5.50,
-        "stock": 20
-    },
-    {
         "codigo": "P002",
         "nombre": "Pizza",
         "categoria": "Comida",
-        "precio": 8.00,
+        "precio": 8.0,
         "stock": 15
     },
     {
         "codigo": "P003",
         "nombre": "Gaseosa",
         "categoria": "Bebida",
-        "precio": 1.50,
+        "precio": 1.5,
         "stock": 30
+    },
+    {
+        "codigo": "P004",
+        "nombre": "Pizza Familiar",
+        "categoria": "Comida",
+        "precio": 12.5,
+        "stock": 10
     }
 ]

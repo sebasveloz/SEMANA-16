@@ -21,7 +21,9 @@ class ArchivoServicio:
             return []
 
         except json.JSONDecodeError:
-            print(f"Error: el archivo {archivo} contiene JSON inválido.")
+            print(
+                f"Error: el archivo {archivo} contiene JSON inválido."
+            )
             return []
 
     def cargar_productos(self) -> list[Producto]:
@@ -63,3 +65,29 @@ class ArchivoServicio:
                 print(f"Error al cargar usuario: {error}")
 
         return usuarios
+
+    def guardar_productos(
+        self,
+        productos: list[Producto]
+    ) -> None:
+        datos = []
+
+        for producto in productos:
+            datos.append(producto.to_dict())
+
+        self.carpeta_datos.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        with open(
+            self.archivo_productos,
+            "w",
+            encoding="utf-8"
+        ) as file:
+            json.dump(
+                datos,
+                file,
+                ensure_ascii=False,
+                indent=4
+            )
