@@ -1,5 +1,6 @@
 from modelos.producto import Producto
 from modelos.usuario import Usuario
+from modelos.venta import Venta
 from servicios.archivo_servicio import ArchivoServicio
 
 
@@ -13,6 +14,10 @@ class RestauranteServicio:
 
         self._usuarios: list[Usuario] = (
             self.archivo_servicio.cargar_usuarios()
+        )
+
+        self._ventas: list[Venta] = (
+            self.archivo_servicio.cargar_ventas()
         )
 
     # -------------------------
@@ -85,6 +90,7 @@ class RestauranteServicio:
         )
 
         self._productos.append(producto)
+
         self.archivo_servicio.guardar_productos(
             self._productos
         )
@@ -149,3 +155,69 @@ class RestauranteServicio:
         self.archivo_servicio.guardar_productos(
             self._productos
         )
+
+    # -------------------------
+    # VENTAS - SEMANA 15
+    # -------------------------
+
+    def listar_ventas(self) -> list[Venta]:
+        return self._ventas
+
+    def cantidad_ventas(self) -> int:
+        return len(self._ventas)
+
+    def registrar_venta(
+        self,
+        usuario: str,
+        producto: str
+    ) -> Venta:
+
+        usuario = usuario.strip()
+        producto = producto.strip()
+
+        if not usuario:
+            raise ValueError(
+                "Debe seleccionar un usuario."
+            )
+
+        if not producto:
+            raise ValueError(
+                "Debe seleccionar un producto."
+            )
+
+        usuario_existe = False
+
+        for item in self._usuarios:
+            if item.nombre == usuario:
+                usuario_existe = True
+                break
+
+        if not usuario_existe:
+            raise ValueError(
+                "El usuario seleccionado no existe."
+            )
+
+        producto_existe = False
+
+        for item in self._productos:
+            if item.nombre == producto:
+                producto_existe = True
+                break
+
+        if not producto_existe:
+            raise ValueError(
+                "El producto seleccionado no existe."
+            )
+
+        venta = Venta(
+            usuario=usuario,
+            producto=producto
+        )
+
+        self._ventas.append(venta)
+
+        self.archivo_servicio.guardar_ventas(
+            self._ventas
+        )
+
+        return venta

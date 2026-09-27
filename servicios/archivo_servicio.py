@@ -3,6 +3,7 @@ from pathlib import Path
 
 from modelos.producto import Producto
 from modelos.usuario import Usuario
+from modelos.venta import Venta
 
 
 class ArchivoServicio:
@@ -11,6 +12,7 @@ class ArchivoServicio:
 
         self.archivo_productos = self.carpeta_datos / "productos.json"
         self.archivo_usuarios = self.carpeta_datos / "usuarios.json"
+        self.archivo_ventas = self.carpeta_datos / "ventas.json"
 
     def _cargar_json(self, archivo: Path) -> list[dict]:
         try:
@@ -82,6 +84,50 @@ class ArchivoServicio:
 
         with open(
             self.archivo_productos,
+            "w",
+            encoding="utf-8"
+        ) as file:
+            json.dump(
+                datos,
+                file,
+                ensure_ascii=False,
+                indent=4
+            )
+
+    # -------------------------
+    # VENTAS - SEMANA 15
+    # -------------------------
+
+    def cargar_ventas(self) -> list[Venta]:
+        datos = self._cargar_json(self.archivo_ventas)
+        ventas = []
+
+        for dato in datos:
+            try:
+                venta = Venta.from_dict(dato)
+                ventas.append(venta)
+
+            except (KeyError, ValueError) as error:
+                print(f"Error al cargar venta: {error}")
+
+        return ventas
+
+    def guardar_ventas(
+        self,
+        ventas: list[Venta]
+    ) -> None:
+        datos = []
+
+        for venta in ventas:
+            datos.append(venta.to_dict())
+
+        self.carpeta_datos.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        with open(
+            self.archivo_ventas,
             "w",
             encoding="utf-8"
         ) as file:
