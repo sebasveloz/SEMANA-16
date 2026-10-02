@@ -4,13 +4,15 @@
         "nombre": "Administrador",
         "correo": "admin@restaurante.com",
         "usuario": "admin",
-        "contrasena": "1234"
+        "contrasena": "1234",
+        "rol": "Administrador"
     },
     {
         "identificacion": "0202",
         "nombre": "Sebastian",
         "correo": "sebastian@restaurante.com",
         "usuario": "sebas",
-        "contrasena": "1234"
+        "contrasena": "1234",
+        "rol": "Empleado"
     }
 ]

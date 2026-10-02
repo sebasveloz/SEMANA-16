@@ -21,7 +21,7 @@ class RestauranteServicio:
         )
 
     # -------------------------
-    # USUARIOS
+    # USUARIOS - SEMANA 16
     # -------------------------
 
     def validar_acceso(
@@ -38,11 +38,173 @@ class RestauranteServicio:
 
         return False
 
+    def obtener_usuario_por_acceso(
+        self,
+        nombre_usuario: str,
+        contrasena: str
+    ) -> Usuario | None:
+        for usuario in self._usuarios:
+            if (
+                usuario.usuario == nombre_usuario
+                and usuario.contrasena == contrasena
+            ):
+                return usuario
+
+        return None
+
     def listar_usuarios(self) -> list[Usuario]:
         return self._usuarios
 
     def cantidad_usuarios(self) -> int:
         return len(self._usuarios)
+
+    def buscar_usuario(
+        self,
+        identificacion: str
+    ) -> Usuario | None:
+        identificacion = identificacion.strip()
+
+        for usuario in self._usuarios:
+            if usuario.identificacion == identificacion:
+                return usuario
+
+        return None
+
+    def registrar_usuario(
+        self,
+        identificacion: str,
+        nombre: str,
+        correo: str,
+        nombre_usuario: str,
+        contrasena: str,
+        rol: str
+    ) -> Usuario:
+
+        identificacion = identificacion.strip()
+        nombre = nombre.strip()
+        correo = correo.strip()
+        nombre_usuario = nombre_usuario.strip()
+        contrasena = contrasena.strip()
+        rol = rol.strip()
+
+        if self.buscar_usuario(identificacion) is not None:
+            raise ValueError(
+                "Ya existe un usuario con esa identificación."
+            )
+
+        for usuario in self._usuarios:
+            if usuario.usuario == nombre_usuario:
+                raise ValueError(
+                    "El nombre de usuario ya está registrado."
+                )
+
+        usuario = Usuario(
+            identificacion,
+            nombre,
+            correo,
+            nombre_usuario,
+            contrasena,
+            rol
+        )
+
+        self._usuarios.append(usuario)
+
+        self.archivo_servicio.guardar_usuarios(
+            self._usuarios
+        )
+
+        return usuario
+
+    def actualizar_usuario(
+        self,
+        identificacion: str,
+        nombre: str,
+        correo: str,
+        nombre_usuario: str,
+        contrasena: str,
+        rol: str
+    ) -> Usuario:
+
+        usuario = self.buscar_usuario(identificacion)
+
+        if usuario is None:
+            raise ValueError(
+                "No existe un usuario con esa identificación."
+            )
+
+        nombre = nombre.strip()
+        correo = correo.strip()
+        nombre_usuario = nombre_usuario.strip()
+        contrasena = contrasena.strip()
+        rol = rol.strip()
+
+        if not nombre:
+            raise ValueError(
+                "El nombre es obligatorio."
+            )
+
+        if not correo:
+            raise ValueError(
+                "El correo es obligatorio."
+            )
+
+        if not nombre_usuario:
+            raise ValueError(
+                "El usuario es obligatorio."
+            )
+
+        if not contrasena:
+            raise ValueError(
+                "La contraseña es obligatoria."
+            )
+
+        if rol not in [
+            "Administrador",
+            "Empleado",
+            "Cliente"
+        ]:
+            raise ValueError(
+                "El rol seleccionado no es válido."
+            )
+
+        for otro_usuario in self._usuarios:
+            if (
+                otro_usuario.usuario == nombre_usuario
+                and otro_usuario.identificacion != identificacion
+            ):
+                raise ValueError(
+                    "El nombre de usuario ya está registrado."
+                )
+
+        usuario.nombre = nombre
+        usuario.correo = correo
+        usuario.usuario = nombre_usuario
+        usuario.contrasena = contrasena
+        usuario.rol = rol
+
+        self.archivo_servicio.guardar_usuarios(
+            self._usuarios
+        )
+
+        return usuario
+
+    def eliminar_usuario(
+        self,
+        identificacion: str
+    ) -> None:
+
+        usuario = self.buscar_usuario(identificacion)
+
+        if usuario is None:
+            raise ValueError(
+                "No existe un usuario con esa identificación."
+            )
+
+        self._usuarios.remove(usuario)
+
+        self.archivo_servicio.guardar_usuarios(
+            self._usuarios
+        )
 
     # -------------------------
     # PRODUCTOS
@@ -54,7 +216,11 @@ class RestauranteServicio:
     def cantidad_productos(self) -> int:
         return len(self._productos)
 
-    def buscar_producto(self, codigo: str) -> Producto | None:
+    def buscar_producto(
+        self,
+        codigo: str
+    ) -> Producto | None:
+
         codigo = codigo.strip()
 
         for producto in self._productos:
@@ -142,7 +308,11 @@ class RestauranteServicio:
 
         return producto
 
-    def eliminar_producto(self, codigo: str) -> None:
+    def eliminar_producto(
+        self,
+        codigo: str
+    ) -> None:
+
         producto = self.buscar_producto(codigo)
 
         if producto is None:

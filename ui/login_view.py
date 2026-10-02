@@ -69,16 +69,17 @@ class LoginView:
             )
             return
 
-        acceso_correcto = (
-            self.restaurante_servicio.validar_acceso(
+        usuario_autenticado = (
+            self.restaurante_servicio.obtener_usuario_por_acceso(
                 usuario,
                 contrasena
             )
         )
 
-        if acceso_correcto:
+        if usuario_autenticado is not None:
             self.frame.destroy()
-            self.mostrar_main()
+            self.mostrar_main(usuario_autenticado)
+
         else:
             messagebox.showerror(
                 "Acceso incorrecto",

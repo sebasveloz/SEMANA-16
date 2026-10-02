@@ -28,6 +28,10 @@ class ArchivoServicio:
             )
             return []
 
+    # -------------------------
+    # PRODUCTOS
+    # -------------------------
+
     def cargar_productos(self) -> list[Producto]:
         datos = self._cargar_json(self.archivo_productos)
         productos = []
@@ -48,26 +52,6 @@ class ArchivoServicio:
 
         return productos
 
-    def cargar_usuarios(self) -> list[Usuario]:
-        datos = self._cargar_json(self.archivo_usuarios)
-        usuarios = []
-
-        for dato in datos:
-            try:
-                usuario = Usuario(
-                    identificacion=dato["identificacion"],
-                    nombre=dato["nombre"],
-                    correo=dato["correo"],
-                    usuario=dato["usuario"],
-                    contrasena=dato["contrasena"]
-                )
-                usuarios.append(usuario)
-
-            except (KeyError, ValueError) as error:
-                print(f"Error al cargar usuario: {error}")
-
-        return usuarios
-
     def guardar_productos(
         self,
         productos: list[Producto]
@@ -84,6 +68,58 @@ class ArchivoServicio:
 
         with open(
             self.archivo_productos,
+            "w",
+            encoding="utf-8"
+        ) as file:
+            json.dump(
+                datos,
+                file,
+                ensure_ascii=False,
+                indent=4
+            )
+
+    # -------------------------
+    # USUARIOS - SEMANA 16
+    # -------------------------
+
+    def cargar_usuarios(self) -> list[Usuario]:
+        datos = self._cargar_json(self.archivo_usuarios)
+        usuarios = []
+
+        for dato in datos:
+            try:
+                usuario = Usuario(
+                    identificacion=dato["identificacion"],
+                    nombre=dato["nombre"],
+                    correo=dato["correo"],
+                    usuario=dato["usuario"],
+                    contrasena=dato["contrasena"],
+                    rol=dato.get("rol", "Administrador")
+                )
+
+                usuarios.append(usuario)
+
+            except (KeyError, ValueError) as error:
+                print(f"Error al cargar usuario: {error}")
+
+        return usuarios
+
+    def guardar_usuarios(
+        self,
+        usuarios: list[Usuario]
+    ) -> None:
+        datos = []
+
+        for usuario in usuarios:
+            datos.append(usuario.to_dict())
+
+        self.carpeta_datos.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        with open(
+            self.archivo_usuarios,
             "w",
             encoding="utf-8"
         ) as file:

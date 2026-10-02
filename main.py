@@ -28,13 +28,14 @@ class RestauranteApp:
             self.mostrar_main
         )
 
-    def mostrar_main(self) -> None:
+    def mostrar_main(self, usuario_autenticado) -> None:
         self.limpiar_ventana()
 
         MainView(
             self.ventana,
             self.restaurante_servicio,
-            self.mostrar_login
+            self.mostrar_login,
+            usuario_autenticado
         )
 
     def ejecutar(self) -> None:
