@@ -19,5 +19,12 @@
         "categoria": "Comida",
         "precio": 12.5,
         "stock": 10
+    },
+    {
+        "codigo": "P001",
+        "nombre": "Agua Dasani",
+        "categoria": "Agua",
+        "precio": 1.0,
+        "stock": 15
     }
 ]
